@@ -1,0 +1,20 @@
+name: Download log file
+
+on:
+ workflow_dispatch:
+
+env:
+ TARGET_FILE: "myfile.txt"
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Show file content
+        if: hashFiles(env.TARGET_FILE) != ''
+        run: |
+         ls -al ${TARGET_FILE}
+         echo "Success! The file '${{ env.TARGET_FILE }}' exists."
+         cat ${TARGET_FILE}

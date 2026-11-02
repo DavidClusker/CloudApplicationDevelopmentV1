@@ -1,0 +1,25 @@
+name: Commit a log file
+
+on:
+ workflow_dispatch:
+
+env:
+ TARGET_FILE: "myfile.txt"
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-26.04
+    permissions: write-all
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - shell: bash
+        run: echo hello world > ${TARGET_FILE}
+      - name: Save the log file
+        if: hashFiles(env.TARGET_FILE) != ''
+        run: |
+         git config --local user.email "github-actions[bot]@users.noreply.github.com"
+         git config --local user.name "github-actions[bot]"
+         git add ${TARGET_FILE}
+         git commit -m "chore: automated log update [skip ci]"
+         git push

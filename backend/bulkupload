@@ -1,0 +1,39 @@
+import json
+from pathlib import Path
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+url = "http://localhost:8000/items/"
+json_file = Path(__file__).with_name("MOCK_DATA.json")
+
+items = json.loads(json_file.read_text(encoding="utf-8"))
+with urlopen(Request(url), timeout=10) as existing_response:
+    existing_items = json.load(existing_response)
+existing_names = {item["name"].strip().casefold() for item in existing_items}
+seen_names = set()
+
+for row_number, item in enumerate(items, start=1):
+    name = item.get("name", "").strip()
+    description = item.get("description", "")
+    name_key = name.casefold()
+
+    if not name or name_key in existing_names or name_key in seen_names:
+        print(f"Skipped row {row_number}: empty or duplicate name")
+        continue
+
+    seen_names.add(name_key)
+    request = Request(
+        url,
+        json.dumps({"name": name, "description": description}).encode("utf-8"),
+        {"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urlopen(request, timeout=10) as response:
+            created_item = json.load(response)
+        existing_names.add(name_key)
+        print(f"Created row {row_number}: {created_item['name']}")
+    except HTTPError as error:
+        error_body = error.read().decode("utf-8", errors="replace")
+        print(f"Failed row {row_number}: {error.code} {error_body}")

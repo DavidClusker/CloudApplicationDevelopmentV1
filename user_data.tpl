@@ -8,7 +8,7 @@ source venv/bin/activate
 
 # Clon the latest app directly onto the server
 git clone https://github.com/DavidClusker/CloudApplicationDevelopmentV1.git
-cd CloudApplicationDevelopmentV1/backend
+cd backend
 pip install -r requirements.txt
 
 # Run Uvicorn on port 80 bound to all interfaces
